@@ -1,0 +1,44 @@
+          <!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow Lab | IA Traduction</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Flow Lab <span>IA</span></h1>
+    </header>
+
+    <main>
+        <div class="selecteur">
+            <select id="langue-source">
+                <option value="fr">Français</option>
+            </select>
+            <button id="switch"> ↔ </button>
+            <select id="langue-cible">
+                <option value="sw">Swahili (Kivu)</option>
+                <option value="mashi">Mashi</option>
+                <option value="lingala">Lingala</option>
+                <option value="kinya">Kinyarwanda</option>
+            </select>
+        </div>
+
+        <textarea id="input-text" placeholder="Entrez votre texte..."></textarea>
+        
+        <div class="options-IA">
+            <label><input type="radio" name="model" value="lstm" checked> Gratuit (LSTM)</label>
+            <label><input type="radio" name="model" value="transformer"> Pro (Transformer) ✨</label>
+        </div>
+
+        <button id="btn-traduire">Traduire maintenant</button>
+
+        <div id="output-text" class="resultat">
+            La traduction s'affichera ici...
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
