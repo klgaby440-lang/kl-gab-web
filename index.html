@@ -101,17 +101,17 @@
     display.innerText = "Calcul sur le nouveau Router...";
 
     try {
-      const response = await fetch(MODEL_URL, {
-        headers: { 
-          "Authorization": `Bearer ${API_TOKEN}`,
-          "Content-Type": "application/json"
-        },
-        method: "POST",
-        body: JSON.stringify({ 
-          inputs: text,
-          parameters: { "src_lang": "fra_Latn", "tgt_lang": "swh_Latn" }
-        }),
-      });
+      const response = await fetch("https://api-inference.huggingface.co/models/facebook/nllb-200-distilled-600M", {
+    headers: { 
+        "Authorization": "Bearer " + API_TOKEN,
+        "Content-Type": "application/json" 
+    },
+    method: "POST",
+    body: JSON.stringify({
+        inputs: "Bonjour tout le monde",
+        parameters: { "tgt_lang": "swh_Latn" } // Indispensable pour le Swahili
+    }),
+});
 
       const result = await response.json();
 
