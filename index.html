@@ -86,32 +86,46 @@
     </footer>
 
     <script>
-        const API_TOKEN = "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"; // Remplace par ton token Hugging Face
-        const MODEL_URL = "https://api-inference.huggingface.co/models/gpt2";
+  const API_TOKEN = "hf_XXXXXXXX"; // TA CLÉ ICI (vérifie qu'elle commence par hf_)
+  const MODEL_URL = "https://api-inference.huggingface.co/models/facebook/nllb-200-distilled-600M";
 
-        document.getElementById("bouton").addEventListener("click", async () => {
-            const text = document.getElementById("entree").value;
-            const targetLang = document.getElementById("langue_trgt").value;
-            const display = document.getElementById("sortie");
+  document.getElementById("bouton").addEventListener("click", async () => {
+    const text = document.getElementById("entree").value;
+    const display = document.getElementById("sortie");
 
-            if(!text) return;
-            display.innerText = "Analyse en cours...";
+    if(!text) return;
+    display.innerText = "Connexion au cerveau de l'IA...";
 
-            try {
-                const response = await fetch(MODEL_URL, {
-                    headers: { Authorization: `Bearer ${API_TOKEN}`, "Content-Type": "application/json" },
-                    method: "POST",
-                    body: JSON.stringify({
-                        inputs: text,
-                        parameters: { tgt_lang: targetLang }
-                    }),
-                });
-                const result = await response.json();
-                display.innerText = result[0].translation_text;
-            } catch (error) {
-                display.innerText = "Erreur de connexion au serveur IA.";
-            }
-        });
-    </script>
+    try {
+      const response = await fetch(MODEL_URL, {
+        headers: { 
+          "Authorization": `Bearer ${API_TOKEN}`,
+          "Content-Type": "application/json" 
+        },
+        method: "POST",
+        body: JSON.stringify({
+          inputs: text,
+          parameters: { "src_lang": "fra_Latn", "tgt_lang": "swh_Latn" }
+        }),
+      });
+
+      const result = await response.json();
+
+      // LOGIQUE DE DÉTECTION
+      if (response.status === 401) {
+        display.innerText = "Erreur : Ton Token Hugging Face n'est pas valide.";
+      } else if (response.status === 503) {
+        display.innerText = "L'IA est en train de se réveiller... Réessaie dans 20 secondes.";
+      } else if (result[0] && result[0].translation_text) {
+        display.innerText = result[0].translation_text;
+      } else {
+        display.innerText = "L'IA a répondu mais n'a pas compris la question.";
+        console.log(result);
+      }
+    } catch (error) {
+      display.innerText = "Problème de réseau. Vérifie ta connexion.";
+    }
+  });
+</script>
 </body>
 </html>
