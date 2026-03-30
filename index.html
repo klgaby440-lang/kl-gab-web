@@ -86,24 +86,26 @@
     </footer>
 
     <script>
-  const API_TOKEN = "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"; // TA CLÉ ICI (vérifie qu'elle commence par hf_)
-  const MODEL_URL = "https://api-inference.huggingface.co/models/facebook/nllb-200-distilled-600M";
+  // Remplace bien par ton jeton hf_...
+  const API_TOKEN = "tontoken"; 
+  // La nouvelle adresse recommandée par Hugging Face
+  const MODEL_URL = "https://router.huggingface.co/hf-inference/models/facebook/nllb-200-distilled-600M";
 
-  document.getElementById("bouton").addEventListener("click", async () => {
+  document.getElementById("bouton").onclick = async function() {
     const text = document.getElementById("entree").value;
     const display = document.getElementById("sortie");
 
     if(!text) return;
-    display.innerText = "Connexion au cerveau de l'IA...";
+    display.innerText = "Calcul sur le nouveau Router...";
 
     try {
       const response = await fetch(MODEL_URL, {
         headers: { 
           "Authorization": `Bearer ${API_TOKEN}`,
-          "Content-Type": "application/json" 
+          "Content-Type": "application/json"
         },
         method: "POST",
-        body: JSON.stringify({
+        body: JSON.stringify({ 
           inputs: text,
           parameters: { "src_lang": "fra_Latn", "tgt_lang": "swh_Latn" }
         }),
@@ -111,21 +113,20 @@
 
       const result = await response.json();
 
-      // LOGIQUE DE DÉTECTION
-      if (response.status === 401) {
-        display.innerText = "Erreur : Ton Token Hugging Face n'est pas valide.";
-      } else if (response.status === 503) {
-        display.innerText = "L'IA est en train de se réveiller... Réessaie dans 20 secondes.";
-      } else if (result[0] && result[0].translation_text) {
-        display.innerText = result[0].translation_text;
+      if (result.error) {
+          display.innerText = "L'IA dit : " + result.error;
+      } else if (Array.isArray(result) && result[0].translation_text) {
+          display.innerText = result[0].translation_text;
+      } else if (result.translation_text) {
+          display.innerText = result.translation_text;
       } else {
-        display.innerText = "L'IA a répondu mais n'a pas compris la question.";
-        console.log(result);
+          display.innerText = "Réponse reçue, mais format inconnu.";
+          console.log(result);
       }
-    } catch (error) {
-      display.innerText = "Problème de réseau. Vérifie ta connexion.";
+    } catch (e) {
+      display.innerText = "Erreur de connexion au Router : " + e.message;
     }
-  });
-</script>
+  };
+    </script>
 </body>
 </html>
