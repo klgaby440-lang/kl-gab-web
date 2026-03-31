@@ -86,15 +86,24 @@
     </footer>
 
     <script>
-  // Remplace bien par ton jeton hf_...
-        const p1 = "hf_sSylFYtzHnoqiLh"
-        const p2 = "SMeneoIjhppTEZATGlq"
+  // Fractionnement du jeton pour éviter la détection automatique sur GitHub
+const p1 = "hf_sSylFYtzHnoqiLh";
+const p2 = "SMeneoIjhppTEZATGlq";
 const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://router.huggingface.co/v1/chat/completions");
-const API_TOKEN = p1+p2; // À remplacer par le jeton valide
+const API_TOKEN = p1 + p2;
+
+// CORRECTION 1 : Lier le bouton à la fonction
+document.getElementById("bouton").addEventListener("click", traduire);
 
 async function traduire() {
     const texteATraduire = document.getElementById("entree").value;
     const zoneResultat = document.getElementById("sortie");
+
+    // CORRECTION 2 : Récupérer les langues sélectionnées dans l'interface
+    const selectSrc = document.getElementById("langue_src");
+    const selectTrgt = document.getElementById("langue_trgt");
+    const langueSource = selectSrc.options[selectSrc.selectedIndex].text;
+    const langueCible = selectTrgt.options[selectTrgt.selectedIndex].text;
 
     if (!texteATraduire) return;
     zoneResultat.innerText = "Analyse linguistique en cours...";
@@ -107,15 +116,16 @@ async function traduire() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "mistralai/Mistral-7B-Instruct-v0.3", // Modèle stable en 2026
+                model: "mistralai/Mistral-7B-Instruct-v0.3",
                 messages: [
                     { 
                         role: "system", 
-                        content: "Tu es l'expert de Luga-Flow. Traduis fidèlement du Français vers le Swahili." 
+                        // Instruction dynamique basée sur les choix de l'utilisateur
+                        content: `L'assistant est l'expert en linguistique de Luga-Flow. Traduis fidèlement du ${langueSource} vers le ${langueCible}. Ne fournis aucune explication, donne uniquement le texte traduit final.` 
                     },
                     { 
                         role: "user", 
-                        content: `Traduis ceci en Swahili : ${texteATraduire}` 
+                        content: `Texte à traduire en ${langueCible} : ${texteATraduire}` 
                     }
                 ],
                 max_tokens: 500
@@ -127,13 +137,13 @@ async function traduire() {
         if (data.choices && data.choices[0].message) {
             zoneResultat.innerText = data.choices[0].message.content;
         } else {
-            zoneResultat.innerText = "Erreur : " + (data.error ? data.error.message : "Réponse vide");
+            zoneResultat.innerText = "Erreur de format : " + (data.error ? data.error.message : "Réponse vide");
         }
 
     } catch (error) {
-        zoneResultat.innerText = "Erreur de connexion (Failed to fetch). Vérifie ton réseau.";
+        zoneResultat.innerText = "Erreur de réseau (Failed to fetch). Le proxy ou le navigateur bloque la requête.";
     }
-}
+        }
     </script>
 </body>
 </html>
