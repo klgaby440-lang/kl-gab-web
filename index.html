@@ -39,50 +39,54 @@
 
     <script>
         const p1 = "hf_sSylFYtzHnoqiLh";
-        const p2 = "SMeneoIjhppTEZATGlq";
-        const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://router.huggingface.co/v1/chat/completions");
-        const API_TOKEN = p1 + p2;
+const p2 = "SMeneoIjhppTEZATGlq";
+const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://router.huggingface.co/v1/chat/completions");
+const API_TOKEN = p1 + p2;
 
-        document.getElementById("bouton").addEventListener("click", traduire);
+document.getElementById("bouton").addEventListener("click", traduire);
 
-        async function traduire() {
-            const texteATraduire = document.getElementById("entree").value;
-            const zoneResultat = document.getElementById("sortie");
-            const langueSource = document.getElementById("langue_src").value;
-            const langueCible = document.getElementById("langue_trgt").value;
+async function traduire() {
+    const texteATraduire = document.getElementById("entree").value;
+    const zoneResultat = document.getElementById("sortie");
+    const langueSource = document.getElementById("langue_src").value;
+    const langueCible = document.getElementById("langue_trgt").value;
 
-            if (!texteATraduire) return;
-            zoneResultat.innerText = "Traduction en cours...";
+    if (!texteATraduire) return;
+    zoneResultat.innerText = "Connexion au cerveau de Luga-Flow...";
 
-            try {
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${API_TOKEN}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "meta-llama/Llama-3.1-8B-Instruct",
-                        messages: [
-                            { role: "system", content: `Tu es un traducteur expert. Traduis du ${langueSource} vers le ${langueCible}. Réponds uniquement avec le texte traduit.` },
-                            { role: "user", content: texteATraduire }
-                        ],
-                        max_tokens: 500,
-                        stream: false
-                    })
-                });
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "meta-llama/Llama-3.1-8B-Instruct",
+                messages: [
+                    { role: "system", content: `Traduis du ${langueSource} vers le ${langueCible}. Réponds uniquement par le texte traduit.` },
+                    { role: "user", content: texteATraduire }
+                ],
+                max_tokens: 500
+            })
+        });
 
-                const data = await response.json();
+        const data = await response.json();
 
-                if (data.choices && data.choices[0].message) {
-                    zoneResultat.innerText = data.choices[0].message.content;
-                } else {
-                    zoneResultat.innerText = "Erreur : " + (data.error ? data.error.message : "Modèle en cours de chargement, réessayez dans 10 secondes.");
-                }
-            } catch (error) {
-                zoneResultat.innerText = "Erreur de connexion. Vérifie ton réseau.";
-            }
+        // Sécurité : on vérifie chaque étape pour éviter le "undefined"
+        if (data && data.choices && data.choices[0] && data.choices[0].message) {
+            zoneResultat.innerText = data.choices[0].message.content;
+        } else if (data && data.error) {
+            // Affiche l'erreur réelle (souvent un problème de quota ou de modèle)
+            zoneResultat.innerText = "Erreur HF : " + (typeof data.error === 'string' ? data.error : data.error.message);
+        } else {
+            zoneResultat.innerText = "Le serveur est occupé. Réessaie dans 10 secondes.";
         }
+
+    } catch (error) {
+        zoneResultat.innerText = "Problème de connexion. Vérifie tes données mobiles.";
+    }
+}
     </script>
 </body>
 </html>
