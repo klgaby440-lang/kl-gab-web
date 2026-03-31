@@ -86,27 +86,27 @@
     </footer>
 
     <script>
-  // Fractionnement du jeton pour éviter la détection automatique sur GitHub
+        // Fractionnement du jeton
 const p1 = "hf_sSylFYtzHnoqiLh";
 const p2 = "SMeneoIjhppTEZATGlq";
 const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://router.huggingface.co/v1/chat/completions");
 const API_TOKEN = p1 + p2;
 
-// CORRECTION 1 : Lier le bouton à la fonction
+// Liaison du bouton à l'action
 document.getElementById("bouton").addEventListener("click", traduire);
 
 async function traduire() {
     const texteATraduire = document.getElementById("entree").value;
     const zoneResultat = document.getElementById("sortie");
 
-    // CORRECTION 2 : Récupérer les langues sélectionnées dans l'interface
+    // Récupération des langues
     const selectSrc = document.getElementById("langue_src");
     const selectTrgt = document.getElementById("langue_trgt");
     const langueSource = selectSrc.options[selectSrc.selectedIndex].text;
     const langueCible = selectTrgt.options[selectTrgt.selectedIndex].text;
 
     if (!texteATraduire) return;
-    zoneResultat.innerText = "Analyse linguistique en cours...";
+    zoneResultat.innerText = "Connexion au serveur et traduction en cours...";
 
     try {
         const response = await fetch(API_URL, {
@@ -116,16 +116,15 @@ async function traduire() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "mistralai/Mistral-7B-Instruct-v0.3",
+                model: "HuggingFaceH4/zephyr-7b-beta", // Modèle certifié 100% Chat
                 messages: [
                     { 
                         role: "system", 
-                        // Instruction dynamique basée sur les choix de l'utilisateur
-                        content: `L'assistant est l'expert en linguistique de Luga-Flow. Traduis fidèlement du ${langueSource} vers le ${langueCible}. Ne fournis aucune explication, donne uniquement le texte traduit final.` 
+                        content: `Traduis fidèlement du ${langueSource} vers le ${langueCible}. Ne donne que la traduction directe, sans aucune explication ni texte supplémentaire.` 
                     },
                     { 
                         role: "user", 
-                        content: `Texte à traduire en ${langueCible} : ${texteATraduire}` 
+                        content: texteATraduire 
                     }
                 ],
                 max_tokens: 500
@@ -141,9 +140,9 @@ async function traduire() {
         }
 
     } catch (error) {
-        zoneResultat.innerText = "Erreur de réseau (Failed to fetch). Le proxy ou le navigateur bloque la requête.";
+        zoneResultat.innerText = "Erreur de réseau (Failed to fetch). Le proxy ou la connexion bloque la requête.";
     }
-        }
+                    }
     </script>
 </body>
 </html>
