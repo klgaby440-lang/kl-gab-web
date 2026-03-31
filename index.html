@@ -38,53 +38,43 @@
     <footer>© 2026 F-LAB IA. Déployé via GitHub Pages.</footer>
 
     <script>
-        const p1 = "hf_sSylFYtzHnoqiLh";
+    const p1 = "hf_sSylFYtzHnoqiLh";
 const p2 = "SMeneoIjhppTEZATGlq";
-const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://router.huggingface.co/v1/chat/completions");
+// On change l'URL pour pointer sur l'API gratuite (Serverless)
+const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://api-inference.huggingface.co/models/facebook/nllb-200-distilled-600M");
 const API_TOKEN = p1 + p2;
 
 document.getElementById("bouton").addEventListener("click", traduire);
 
 async function traduire() {
-    const texteATraduire = document.getElementById("entree").value;
-    const zoneResultat = document.getElementById("sortie");
-    const langueSource = document.getElementById("langue_src").value;
-    const langueCible = document.getElementById("langue_trgt").value;
+    const texte = document.getElementById("entree").value;
+    const sortie = document.getElementById("sortie");
+    if (!texte) return;
 
-    if (!texteATraduire) return;
-    zoneResultat.innerText = "Connexion au cerveau de Luga-Flow...";
+    sortie.innerText = "Traduction gratuite en cours...";
 
     try {
         const response = await fetch(API_URL, {
             method: "POST",
-            headers: {
-                "Authorization": `Bearer ${API_TOKEN}`,
-                "Content-Type": "application/json"
-            },
+            headers: { "Authorization": `Bearer ${API_TOKEN}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-                model: "meta-llama/Llama-3.1-8B-Instruct",
-                messages: [
-                    { role: "system", content: `Traduis du ${langueSource} vers le ${langueCible}. Réponds uniquement par le texte traduit.` },
-                    { role: "user", content: texteATraduire }
-                ],
-                max_tokens: 500
+                inputs: texte,
+                parameters: { src_lang: "fra_Latn", tgt_lang: "swh_Latn" }
             })
         });
 
         const data = await response.json();
 
-        // Sécurité : on vérifie chaque étape pour éviter le "undefined"
-        if (data && data.choices && data.choices[0] && data.choices[0].message) {
-            zoneResultat.innerText = data.choices[0].message.content;
-        } else if (data && data.error) {
-            // Affiche l'erreur réelle (souvent un problème de quota ou de modèle)
-            zoneResultat.innerText = "Erreur HF : " + (typeof data.error === 'string' ? data.error : data.error.message);
+        // Structure de réponse simplifiée pour NLLB
+        if (data && data[0] && data[0].translation_text) {
+            sortie.innerText = data[0].translation_text;
+        } else if (data.error && data.error.includes("loading")) {
+            sortie.innerText = "Réveil du modèle (20 sec)... Recliquez.";
         } else {
-            zoneResultat.innerText = "Le serveur est occupé. Réessaie dans 10 secondes.";
+            sortie.innerText = "Quota atteint. Changez de jeton demain.";
         }
-
-    } catch (error) {
-        zoneResultat.innerText = "Problème de connexion. Vérifie tes données mobiles.";
+    } catch (e) {
+        sortie.innerText = "Erreur réseau.";
     }
 }
     </script>
