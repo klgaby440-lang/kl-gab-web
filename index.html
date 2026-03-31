@@ -115,20 +115,23 @@ async function traduire() {
                 "Authorization": `Bearer ${API_TOKEN}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                model: "HuggingFaceH4/zephyr-7b-beta", // Modèle certifié 100% Chat
-                messages: [
-                    { 
-                        role: "system", 
-                        content: `Traduis fidèlement du ${langueSource} vers le ${langueCible}. Ne donne que la traduction directe, sans aucune explication ni texte supplémentaire.` 
-                    },
-                    { 
-                        role: "user", 
-                        content: texteATraduire 
-                    }
-                ],
-                max_tokens: 500
-            })
+        // URL et Token restent identiques (avec corsproxy.io)
+// ...
+
+        body: JSON.stringify({
+            model: "meta-llama/Llama-3.1-8B-Instruct", // MODÈLE LE PLUS STABLE
+            messages: [
+                { 
+                    role: "system", 
+                    content: `Traduis du ${langueSource} vers le ${langueCible}. Réponds uniquement par le texte traduit.` 
+                },
+                { 
+                    role: "user", 
+                    content: texteATraduire 
+                }
+            ],
+            max_tokens: 500,
+            stream: false // Force une réponse complète pour éviter les erreurs de format
         });
 
         const data = await response.json();
