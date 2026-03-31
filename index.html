@@ -5,21 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FLOW LAB | IA TRADUCTION</title>
     <style>
-        body { background-color: #F9F9F9; padding: 20px; font-family: sans-serif; text-align: center; }
-        main { background-color: white; padding: 30px; width: 90%; max-width: 600px; margin: 0 auto; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        textarea { width: 100%; padding: 15px; height: 150px; margin: 15px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { background-color: orange; color: white; width: 100%; padding: 15px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        :root { --primary: orange; --bg: #F9F9F9; --card: white; }
+        body { background-color: var(--bg); padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; color: #333; }
+        main { background-color: var(--card); padding: 30px; width: 95%; max-width: 600px; margin: 0 auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h1 { margin-bottom: 5px; color: #222; }
+        .subtitle { font-size: 0.9em; color: #666; margin-bottom: 20px; }
         .menu { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px; }
-        select { flex: 1; padding: 10px; border-radius: 5px; }
-        h2#sortie { margin-top: 20px; padding: 15px; background: #f1f1f1; border-radius: 5px; font-size: 1.1em; color: #333; min-height: 50px; }
-        footer { margin-top: 30px; font-size: 0.8em; color: #777; }
+        select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
+        textarea { width: 100%; padding: 15px; height: 160px; margin: 15px 0; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; font-size: 16px; resize: none; outline: none; }
+        textarea:focus { border-color: var(--primary); }
+        button { background-color: var(--primary); color: white; width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: transform 0.1s, opacity 0.2s; }
+        button:active { transform: scale(0.98); }
+        #sortie { margin-top: 25px; padding: 20px; background: #f8f8f8; border-radius: 8px; font-size: 1.1em; color: #444; border-left: 5px solid var(--primary); text-align: left; min-height: 40px; }
+        footer { margin-top: 40px; font-size: 0.85em; color: #999; }
     </style>
 </head>
 <body>
+
     <header>
         <h1>FLOW LAB</h1>
-        <p>IA TRADUCTION / LANGUES AFRICAINES</p>
+        <p class="subtitle">SYSTÈME DE TRADUCTION INTELLIGENT</p>
     </header>
+
     <main>
         <div class="menu">
             <select id="langue_src">
@@ -31,56 +38,76 @@
                 <option value="Français">Français</option>
             </select>
         </div>
-        <textarea id="entree" placeholder="Entrez votre texte ici..."></textarea>
-        <button id="bouton">TRADUIRE</button>
-        <h2 id="sortie">La traduction s'affichera ici...</h2>
+
+        <textarea id="entree" placeholder="Tapez votre texte ici..."></textarea>
+        
+        <button id="bouton">TRADUIRE MAINTENANT</button>
+
+        <div id="sortie">La traduction s'affichera ici...</div>
     </main>
-    <footer>© 2026 F-LAB IA. Déployé via GitHub Pages.</footer>
+
+    <footer>
+        © 2026 F-LAB IA. Déployé via GitHub Pages.<br>
+        Optimisé pour les langues locales.
+    </footer>
 
     <script>
-    const p1 = "hf_ltYwfxkFyoeSQlhI";
-const p2 = "iwvXzYicsfNtieWzPz";
-// Changement d'URL vers l'API Serverless (Gratuite)
-const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://router.huggingface.co/models/facebook/nllb-200-distilled-600M");
-const API_TOKEN = p1 + p2;
+        // Configuration Hugging Face avec ton nouveau Jeton
+        const p1 = "hf_ltYwfxkFyoeSQlh"; 
+        const p2 = "IiwvXzYicsfNtieWzPz";
+        const API_TOKEN = p1 + p2;
 
-async function traduire() {
-    const texte = document.getElementById("entree").value;
-    const zoneSortie = document.getElementById("sortie");
-    if (!texte) return;
+        // URL Router + Proxy pour éviter les erreurs de réseau (CORS)
+        const BASE_URL = "https://router.huggingface.co/v1/chat/completions";
+        const API_URL = "https://corsproxy.io/?" + encodeURIComponent(BASE_URL);
 
-    zoneSortie.innerText = "Traduction gratuite en cours...";
+        document.getElementById("bouton").addEventListener("click", traduire);
 
-    try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { 
-                "Authorization": `Bearer ${API_TOKEN}`, 
-                "Content-Type": "application/json" 
-            },
-            body: JSON.stringify({
-                inputs: texte,
-                parameters: { 
-                    src_lang: "fra_Latn", // Français
-                    tgt_lang: "swh_Latn"  // Swahili
+        async function traduire() {
+            const input = document.getElementById("entree").value;
+            const output = document.getElementById("sortie");
+            const src = document.getElementById("langue_src").value;
+            const trgt = document.getElementById("langue_trgt").value;
+
+            if (!input.trim()) return;
+
+            output.innerText = "Traitement par l'IA en cours...";
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${API_TOKEN}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "meta-llama/Llama-3.1-8B-Instruct",
+                        messages: [
+                            { 
+                                role: "system", 
+                                content: `Tu es un traducteur expert. Traduis fidèlement du ${src} vers le ${trgt}. Ne donne aucune explication, réponds uniquement avec la traduction.` 
+                            },
+                            { role: "user", content: input }
+                        ],
+                        max_tokens: 500,
+                        temperature: 0.3
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.choices && data.choices[0]) {
+                    output.innerText = data.choices[0].message.content.trim();
+                } else if (data.error) {
+                    output.innerText = "Statut : " + (data.error.message || "Vérifiez vos crédits HF.");
+                } else {
+                    output.innerText = "Serveur occupé. Réessayez dans un instant.";
                 }
-            })
-        });
 
-        const data = await response.json();
-
-        if (data && data[0] && data[0].translation_text) {
-            zoneSortie.innerText = data[0].translation_text;
-        } else if (data.error && data.error.includes("currently loading")) {
-            zoneSortie.innerText = "Réveil du modèle... Attendez 20 secondes et recliquez.";
-        } else {
-            zoneSortie.innerText = "Erreur : " + (data.error || "Réponse inconnue");
+            } catch (error) {
+                output.innerText = "Erreur de connexion. Vérifiez vos données mobiles.";
+            }
         }
-    } catch (e) {
-        zoneSortie.innerText = "Erreur de réseau. Vérifiez la connexion.";
-    }
-}
-document.getElementById("bouton").onclick = traduire;
     </script>
 </body>
 </html>
