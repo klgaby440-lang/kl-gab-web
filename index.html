@@ -89,7 +89,7 @@
   // Remplace bien par ton jeton hf_...
         const p1 = "hf_sSylFYtzHnoqiLh"
         const p2 = "SMeneoIjhppTEZATGlq"
-  const API_URL = "https://router.huggingface.co/v1/chat/completions";
+const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://router.huggingface.co/v1/chat/completions");
 const API_TOKEN = p1+p2; // À remplacer par le jeton valide
 
 async function traduire() {
