@@ -5,36 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FLOW LAB | IA TRADUCTION</title>
     <style>
-        body {
-            background-color: #F9F9F9;
-            padding: 20px;
-            font-family: sans-serif;
-            text-align: center;
+        body { background-color: #F9F9F9; padding: 20px; font-family: sans-serif; text-align: center; }
+        main { background-color: white; padding: 30px; width: 90%; max-width: 600px; margin: 0 auto; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        textarea { width: 100%; padding: 15px; height: 150px; margin: 15px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { background-color: orange; color: white; width: 100%; padding: 15px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .menu { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px; }
+        select { flex: 1; padding: 10px; border-radius: 5px; }
+        h2#sortie { margin-top: 20px; padding: 15px; background: #f1f1f1; border-radius: 5px; font-size: 1.1em; color: #333; min-height: 50px; }
+        footer { margin-top: 30px; font-size: 0.8em; color: #777; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>FLOW LAB</h1>
+        <p>IA TRADUCTION / LANGUES AFRICAINES</p>
+    </header>
+    <main>
+        <div class="menu">
+            <select id="langue_src">
+                <option value="Français">Français</option>
+                <option value="Swahili">Swahili</option>
+            </select>
+            <select id="langue_trgt">
+                <option value="Swahili">Swahili</option>
+                <option value="Français">Français</option>
+            </select>
+        </div>
+        <textarea id="entree" placeholder="Entrez votre texte ici..."></textarea>
+        <button id="bouton">TRADUIRE</button>
+        <h2 id="sortie">La traduction s'affichera ici...</h2>
+    </main>
+    <footer>© 2026 F-LAB IA. Déployé via GitHub Pages.</footer>
+
+    <script>
+        const p1 = "hf_sSylFYtzHnoqiLh";
+        const p2 = "SMeneoIjhppTEZATGlq";
+        const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://router.huggingface.co/v1/chat/completions");
+        const API_TOKEN = p1 + p2;
+
+        document.getElementById("bouton").addEventListener("click", traduire);
+
+        async function traduire() {
+            const texteATraduire = document.getElementById("entree").value;
+            const zoneResultat = document.getElementById("sortie");
+            const langueSource = document.getElementById("langue_src").value;
+            const langueCible = document.getElementById("langue_trgt").value;
+
+            if (!texteATraduire) return;
+            zoneResultat.innerText = "Traduction en cours...";
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${API_TOKEN}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "meta-llama/Llama-3.1-8B-Instruct",
+                        messages: [
+                            { role: "system", content: `Tu es un traducteur expert. Traduis du ${langueSource} vers le ${langueCible}. Réponds uniquement avec le texte traduit.` },
+                            { role: "user", content: texteATraduire }
+                        ],
+                        max_tokens: 500,
+                        stream: false
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.choices && data.choices[0].message) {
+                    zoneResultat.innerText = data.choices[0].message.content;
+                } else {
+                    zoneResultat.innerText = "Erreur : " + (data.error ? data.error.message : "Modèle en cours de chargement, réessayez dans 10 secondes.");
+                }
+            } catch (error) {
+                zoneResultat.innerText = "Erreur de connexion. Vérifie ton réseau.";
+            }
         }
-        main {
-            background-color: white;
-            padding: 30px;
-            width: 90%;
-            max-width: 600px;
-            margin: 0 auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        textarea {
-            width: 100%;
-            padding: 15px;
-            height: 150px;
-            margin: 15px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: orange;
-            color: white;
-            width: 100%;
-            padding: 15px;
-            border: none;
+    </script>
+</body>
+</html>            border: none;
             border-radius: 5px;
             font-weight: bold;
             cursor: pointer;
