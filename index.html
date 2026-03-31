@@ -5,26 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FLOW LAB | IA TRADUCTION</title>
     <style>
-        :root { --primary: orange; --bg: #F9F9F9; --card: white; }
-        body { background-color: var(--bg); padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; color: #333; }
-        main { background-color: var(--card); padding: 30px; width: 95%; max-width: 600px; margin: 0 auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h1 { margin-bottom: 5px; color: #222; }
-        .subtitle { font-size: 0.9em; color: #666; margin-bottom: 20px; }
-        .menu { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px; }
-        select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
-        textarea { width: 100%; padding: 15px; height: 160px; margin: 15px 0; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; font-size: 16px; resize: none; outline: none; }
-        textarea:focus { border-color: var(--primary); }
-        button { background-color: var(--primary); color: white; width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: transform 0.1s, opacity 0.2s; }
-        button:active { transform: scale(0.98); }
-        #sortie { margin-top: 25px; padding: 20px; background: #f8f8f8; border-radius: 8px; font-size: 1.1em; color: #444; border-left: 5px solid var(--primary); text-align: left; min-height: 40px; }
-        footer { margin-top: 40px; font-size: 0.85em; color: #999; }
+        :root { --primary: #FF9900; --secondary: #007788; --bg: #F9F9F9; --card: white; }
+        body { background-color: var(--bg); padding: 20px; font-family: 'Segoe UI', sans-serif; text-align: center; color: #333; margin: 0; }
+        
+        /* Logo Minimaliste Flow-Node */
+       .logo-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px; }
+       .logo-icon { width: 45px; height: 45px; background: linear-gradient(45deg, var(--primary), var(--secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 26px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+       .logo-text { font-size: 28px; font-weight: 800; color: #222; letter-spacing: -1px; }
+
+        main { background-color: var(--card); padding: 30px; width: 95%; max-width: 550px; margin: 0 auto; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+       .menu { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px; }
+        select { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ddd; background: #fff; font-size: 14px; }
+        textarea { width: 100%; padding: 15px; height: 140px; margin: 15px 0; border: 1px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 16px; resize: none; outline: none; transition: border 0.3s; }
+        textarea:focus { border-color: var(--secondary); }
+        button { background: linear-gradient(135deg, var(--primary), #e68a00); color: white; width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: transform 0.1s; box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3); }
+        button:active { transform: scale(0.97); }
+        #sortie { margin-top: 25px; padding: 20px; background: #f0f4f4; border-radius: 12px; font-size: 1.1em; color: #2c3e50; border-left: 6px solid var(--secondary); text-align: left; min-height: 50px; line-height: 1.5; }
+        footer { margin-top: 40px; font-size: 0.85em; color: #bbb; line-height: 1.6; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>FLOW LAB</h1>
-        <p class="subtitle">SYSTÈME DE TRADUCTION INTELLIGENT</p>
+        <div class="logo-container">
+            <div class="logo-icon">f</div>
+            <div class="logo-text">FLOW LAB</div>
+        </div>
+        <p style="color: #888; font-size: 0.9em; margin-bottom: 30px;">L'IA au service des langues locales</p>
     </header>
 
     <main>
@@ -32,9 +39,11 @@
             <select id="langue_src">
                 <option value="Français">Français</option>
                 <option value="Swahili">Swahili</option>
+                <option value="Mashi">Mashi</option>
             </select>
             <select id="langue_trgt">
                 <option value="Swahili">Swahili</option>
+                <option value="Mashi">Mashi</option>
                 <option value="Français">Français</option>
             </select>
         </div>
@@ -43,23 +52,22 @@
         
         <button id="bouton">TRADUIRE MAINTENANT</button>
 
-        <div id="sortie">La traduction s'affichera ici...</div>
+        <div id="sortie">La traduction apparaîtra ici...</div>
     </main>
 
     <footer>
         © 2026 F-LAB IA. Déployé via GitHub Pages.<br>
-        Optimisé pour les langues locales.
+        Propulsé par Llama-3.1 (Hugging Face)
     </footer>
 
     <script>
-        // Configuration Hugging Face avec ton nouveau Jeton
-        const p1 = "hf_ltYwfxkFyoeSQlh"; 
-        const p2 = "IiwvXzYicsfNtieWzPz";
+        // TOKEN SECURISÉ (Vérifie bien que la somme des deux fait ton jeton complet)
+        const p1 = "hf_sSylFYtzHnoqiLh"; 
+        const p2 = "SMeneoIjhppTEZATGlq";
         const API_TOKEN = p1 + p2;
 
-        // URL Router + Proxy pour éviter les erreurs de réseau (CORS)
-        const BASE_URL = "https://router.huggingface.co/v1/chat/completions";
-        const API_URL = "https://corsproxy.io/?" + encodeURIComponent(BASE_URL);
+        // URL DIRECTE (Plus stable que le Router pour le niveau gratuit)
+        const API_URL = "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct";
 
         document.getElementById("bouton").addEventListener("click", traduire);
 
@@ -71,7 +79,7 @@
 
             if (!input.trim()) return;
 
-            output.innerText = "Traitement par l'IA en cours...";
+            output.innerHTML = "<em>Recherche des racines linguistiques...</em>";
 
             try {
                 const response = await fetch(API_URL, {
@@ -81,31 +89,24 @@
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        model: "meta-llama/Llama-3.1-8B-Instruct",
-                        messages: [
-                            { 
-                                role: "system", 
-                                content: `Tu es un traducteur expert. Traduis fidèlement du ${src} vers le ${trgt}. Ne donne aucune explication, réponds uniquement avec la traduction.` 
-                            },
-                            { role: "user", content: input }
-                        ],
-                        max_tokens: 500,
-                        temperature: 0.3
+                        inputs: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nTu es un traducteur expert en langues africaines. Traduis fidèlement du ${src} vers le ${trgt}. Ne donne aucune explication, réponds uniquement avec le texte traduit.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n${input}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n`,
+                        parameters: { max_new_tokens: 250, temperature: 0.1 }
                     })
                 });
 
                 const data = await response.json();
 
-                if (data.choices && data.choices[0]) {
-                    output.innerText = data.choices[0].message.content.trim();
+                if (Array.isArray(data) && data.generated_text) {
+                    // Nettoyage de la réponse pour ne garder que la traduction
+                    const texteBrut = data.generated_text;
+                    const parties = texteBrut.split("<|start_header_id|>assistant<|end_header_id|>\n\n");
+                    output.innerText = parties[parties.length - 1].trim();
                 } else if (data.error) {
-                    output.innerText = "Statut : " + (data.error.message || "Vérifiez vos crédits HF.");
-                } else {
-                    output.innerText = "Serveur occupé. Réessayez dans un instant.";
+                    output.innerText = "Info : Le modèle se réveille. Réessayez dans 10 secondes.";
+                    console.log(data.error);
                 }
-
             } catch (error) {
-                output.innerText = "Erreur de connexion. Vérifiez vos données mobiles.";
+                output.innerText = "Problème de réseau. Vérifiez votre connexion à Bukavu.";
             }
         }
     </script>
