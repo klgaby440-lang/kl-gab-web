@@ -89,45 +89,51 @@
   // Remplace bien par ton jeton hf_...
         const p1 = "hf_sSylFYtzHnoqiLh"
         const p2 = "SMeneoIjhppTEZATGlq"
-  const API_TOKEN = p1+p2;
-// La nouvelle URL standardisée pour 2026
-    const MODEL_URL = "https://router.huggingface.co/hf-inference/models/facebook/nllb-200-distilled-600M";
-  document.getElementById("bouton").onclick = async function() {
-    const text = document.getElementById("entree").value;
-    const display = document.getElementById("sortie");
+  const API_URL = "https://router.huggingface.co/v1/chat/completions";
+const API_TOKEN = p1+p2; // À remplacer par le jeton valide
 
-    if(!text) return;
-    display.innerText = "Calcul sur le nouveau Router...";
+async function traduire() {
+    const texteATraduire = document.getElementById("entree").value;
+    const zoneResultat = document.getElementById("sortie");
+
+    if (!texteATraduire) return;
+    zoneResultat.innerText = "Analyse linguistique en cours...";
 
     try {
-      const response = await fetch("https://api-inference.huggingface.co/models/facebook/nllb-200-distilled-600M", {
-    headers: { 
-        "Authorization": "Bearer " + API_TOKEN,
-        "Content-Type": "application/json" 
-    },
-    method: "POST",
-    body: JSON.stringify({
-        inputs: "Bonjour tout le monde",
-        parameters: { "tgt_lang": "swh_Latn" } // Indispensable pour le Swahili
-    }),
-});
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "mistralai/Mistral-7B-Instruct-v0.3", // Modèle stable en 2026
+                messages: [
+                    { 
+                        role: "system", 
+                        content: "Tu es l'expert de Luga-Flow. Traduis fidèlement du Français vers le Swahili." 
+                    },
+                    { 
+                        role: "user", 
+                        content: `Traduis ceci en Swahili : ${texteATraduire}` 
+                    }
+                ],
+                max_tokens: 500
+            })
+        });
 
-      const result = await response.json();
+        const data = await response.json();
 
-      if (result.error) {
-          display.innerText = "L'IA dit : " + result.error;
-      } else if (Array.isArray(result) && result[0].translation_text) {
-          display.innerText = result[0].translation_text;
-      } else if (result.translation_text) {
-          display.innerText = result.translation_text;
-      } else {
-          display.innerText = "Réponse reçue, mais format inconnu.";
-          console.log(result);
-      }
-    } catch (e) {
-      display.innerText = "Erreur de connexion au Router : " + e.message;
+        if (data.choices && data.choices[0].message) {
+            zoneResultat.innerText = data.choices[0].message.content;
+        } else {
+            zoneResultat.innerText = "Erreur : " + (data.error ? data.error.message : "Réponse vide");
+        }
+
+    } catch (error) {
+        zoneResultat.innerText = "Erreur de connexion (Failed to fetch). Vérifie ton réseau.";
     }
-  };
+}
     </script>
 </body>
 </html>
