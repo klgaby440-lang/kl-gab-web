@@ -40,43 +40,47 @@
     <script>
     const p1 = "hf_sSylFYtzHnoqiLh";
 const p2 = "SMeneoIjhppTEZATGlq";
-// On change l'URL pour pointer sur l'API gratuite (Serverless)
+// Changement d'URL vers l'API Serverless (Gratuite)
 const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://api-inference.huggingface.co/models/facebook/nllb-200-distilled-600M");
 const API_TOKEN = p1 + p2;
 
-document.getElementById("bouton").addEventListener("click", traduire);
-
 async function traduire() {
     const texte = document.getElementById("entree").value;
-    const sortie = document.getElementById("sortie");
+    const zoneSortie = document.getElementById("sortie");
     if (!texte) return;
 
-    sortie.innerText = "Traduction gratuite en cours...";
+    zoneSortie.innerText = "Traduction gratuite en cours...";
 
     try {
         const response = await fetch(API_URL, {
             method: "POST",
-            headers: { "Authorization": `Bearer ${API_TOKEN}`, "Content-Type": "application/json" },
+            headers: { 
+                "Authorization": `Bearer ${API_TOKEN}`, 
+                "Content-Type": "application/json" 
+            },
             body: JSON.stringify({
                 inputs: texte,
-                parameters: { src_lang: "fra_Latn", tgt_lang: "swh_Latn" }
+                parameters: { 
+                    src_lang: "fra_Latn", // Français
+                    tgt_lang: "swh_Latn"  // Swahili
+                }
             })
         });
 
         const data = await response.json();
 
-        // Structure de réponse simplifiée pour NLLB
         if (data && data[0] && data[0].translation_text) {
-            sortie.innerText = data[0].translation_text;
-        } else if (data.error && data.error.includes("loading")) {
-            sortie.innerText = "Réveil du modèle (20 sec)... Recliquez.";
+            zoneSortie.innerText = data[0].translation_text;
+        } else if (data.error && data.error.includes("currently loading")) {
+            zoneSortie.innerText = "Réveil du modèle... Attendez 20 secondes et recliquez.";
         } else {
-            sortie.innerText = "Quota atteint. Changez de jeton demain.";
+            zoneSortie.innerText = "Erreur : " + (data.error || "Réponse inconnue");
         }
     } catch (e) {
-        sortie.innerText = "Erreur réseau.";
+        zoneSortie.innerText = "Erreur de réseau. Vérifiez la connexion.";
     }
 }
+document.getElementById("bouton").onclick = traduire;
     </script>
 </body>
 </html>
