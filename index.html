@@ -3,66 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRADUCTION | NLLB-200</title>
+    <title>FLOW LAB | Traduction Spécialisée</title>
     <style>
-        :root { --primary: #28a745; --bg: #F9F9F9; --card: white; }
-        body { background-color: var(--bg); padding: 20px; font-family: sans-serif; text-align: center; color: #333; }
-        main { background-color: var(--card); padding: 30px; width: 95%; max-width: 600px; margin: 0 auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        textarea { width: 100%; padding: 15px; height: 160px; margin: 15px 0; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; font-size: 16px; resize: none; }
-        button { background-color: var(--primary); color: white; width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #sortie { margin-top: 25px; padding: 20px; background: #f8f8f8; border-radius: 8px; font-size: 1.1em; text-align: left; min-height: 40px; border-left: 5px solid var(--primary); }
+        /* --- Couleurs et Variables (Design Bleu) --- */
+        :root {
+            --primary-blue: #0056b3;      /* Bleu Foncé pour les éléments principaux */
+            --secondary-blue: #007bff;    /* Bleu Vif pour les boutons et accents */
+            --light-blue: #e6f0ff;        /* Bleu Très Clair pour les fonds d'entrée */
+            --bg-color: #f4f7f6;          /* Gris très clair pour le fond de page */
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-color: #d1d9e6;
+        }
+
+        /* --- Reset et Styles de Base --- */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- En-tête (Header) --- */
+        header {
+            width: 100%;
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* --- Conteneur Principal (Main) --- */
+        main {
+            width: 90%;
+            max-width: 650px;
+            background-color: var(--card-bg);
+            margin: 40px 0;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- Zone d'Entrée Texte --- */
+        fieldset {
+            border: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        legend {
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background-color: var(--light-blue);
+            font-size: 1rem;
+            resize: none; /* Empêche le redimensionnement manuel */
+            transition: border-color 0.3s;
+            box-sizing: border-box; /* Important pour le padding */
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--secondary-blue);
+        }
+
+        /* --- Bouton d'Action --- */
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--secondary-blue);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            box-shadow: 0 4px 6px rgba(0,123,255,0.2);
+        }
+
+        button:hover {
+            background-color: var(--primary-blue);
+        }
+
+        button:active {
+            transform: scale(0.98); /* Effet d'enfoncement */
+        }
+
+        /* --- Zone de Sortie (Résultat) --- */
+        #zone-sortie {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid var(--secondary-blue);
+            min-height: 50px;
+        }
+
+        #titre-sortie {
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+        }
+
+        #traduction-texte {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        /* --- Pied de page (Footer) --- */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: #777;
+        }
     </style>
 </head>
 <body>
+
     <header>
-        <h1>Modèle : NLLB-200</h1>
-        <p>distilled-600M</p>
+        <h1>FLOW LAB</h1>
+        <p>Moteur de Traduction validé : Qwen2.5</p>
     </header>
+
     <main>
-        <textarea id="entree" placeholder="Texte en français à traduire..."></textarea>
-        <button id="bouton">LANCER LA TRADUCTION</button>
-        <div id="sortie">La traduction s'affichera ici...</div>
+        <fieldset>
+            <legend>Français (Texte source)</legend>
+            <textarea id="texte-entree" placeholder="Entrez votre texte ici..."></textarea>
+        </fieldset>
+
+        <button id="bouton-traduire">TRADUIRE EN SWAHILI</button>
+
+        <div id="zone-sortie">
+            <div id="titre-sortie">Swahili (Traduction) :</div>
+            <div id="traduction-texte">La traduction apparaîtra ici...</div>
+        </div>
     </main>
 
+    <footer>
+        Développé stratégiquement à Goma | Flow Lab &copy; 2024
+    </footer>
+
     <script>
+        // --- CONFIGURATION STRATÉGIQUE ---
+        // 1. Remplace 'hf_...' par ton jeton d'accès Hugging Face (type READ)
         const p1 = "hf_upEJEWLPHPyrk";
         const p2 = "FjVurCpJlsCvXlPNIaiZm";
-        const API_TOKEN = p1+p2; 
-        const API_URL = "https://router.huggingface.co/hf-inference/models/facebook/nllb-200-distilled-600M";
+        const API_TOKEconstN = p1+p2; 
+        const HF_TOKEN = p1+p2; 
+        
+        // 2. L'URL du modèle validé (Qwen)
+        const API_URL = "https://router.huggingface.co/models/Qwen/Qwen2.5-1.5B-Instruct";
 
-        document.getElementById("bouton").addEventListener("click", async () => {
-            const input = document.getElementById("entree").value;
-            const output = document.getElementById("sortie");
-            if (!input.trim()) return;
+        // --- LOGIQUE DE L'APPLICATION ---
+        const bouton = document.getElementById('bouton-traduire');
+        const entree = document.getElementById('texte-entree');
+        const sortie = document.getElementById('traduction-texte');
 
-            output.innerText = "Traduction en cours...";
+        bouton.addEventListener('click', async () => {
+            const texteATraduire = entree.value.trim();
+
+            // Stratégie : Ne pas envoyer de requête vide
+            if (!texteATraduire) {
+                sortie.innerText = "Veuillez entrer du texte avant de traduire.";
+                sortie.style.color = "red";
+                return;
+            }
+
+            // Posture : Informer l'utilisateur que le flux est en cours
+            sortie.innerText = "Traduction en cours... (Patientez)";
+            sortie.style.color = "#555";
+            bouton.disabled = true; // Désactive le bouton pendant la requête
+            bouton.innerText = "CHARGEMENT...";
 
             try {
+                // Posture : Construire la requête avec l'instruction (System Prompt)
                 const response = await fetch(API_URL, {
                     method: "POST",
                     headers: {
-                        "Authorization": `Bearer ${API_TOKEN}`,
+                        "Authorization": `Bearer ${HF_TOKEN}`,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        "inputs": input,
+                        "inputs": `Traduire fidèlement le texte suivant du français vers le swahili, sans ajouter de commentaires : "${texteATraduire}"`,
                         "parameters": {
-                            "src_lang": "fra_Latn",
-                            "tgt_lang": "swh_Latn"
+                            "max_new_tokens": 512,
+                            "temperature": 0.1 // Température basse pour une traduction précise
                         }
                     })
                 });
 
-                const data = await response.json();
-                if (data[0] && data[0].translation_text) {
-                    output.innerText = data[0].translation_text;
+                const result = await response.json();
+
+                // Stratégie : Gérer la réponse de Qwen (modèle de Chat)
+                if (result && result[0] && result[0].generated_text) {
+                    // Nettoyage simple : Qwen peut répéter l'input, on essaie d'extraire la réponse
+                    let traduction = result[0].generated_text;
+                    
+                    // Si le modèle répète l'instruction, on tente de nettoyer (approche basique)
+                    if (traduction.includes(texteATraduire)) {
+                        traduction = traduction.split(texteATraduire).pop().replace(/"/g, '').trim();
+                    }
+                    
+                    sortie.innerText = traduction;
+                    sortie.style.color = var(--text-color);
                 } else {
-                    output.innerText = "Erreur : Vérifier le quota ou le jeton.";
+                    // Gestion stratégique des erreurs API (Quota, Jeton, etc.)
+                    sortie.innerText = "Erreur : L'API n'a pas renvoyé de texte. Vérifiez votre jeton ou réessayez plus tard.";
+                    sortie.style.color = "red";
+                    console.error("Réponse API incomplète :", result);
                 }
+
             } catch (error) {
-                output.innerText = "Erreur de connexion réseau.";
+                // Gestion des erreurs de connexion réseau
+                sortie.innerText = "Erreur de connexion : Impossible de joindre le serveur Hugging Face.";
+                sortie.style.color = "red";
+                console.error("Erreur Fetch :", error);
+            } finally {
+                // Rétablir l'état du bouton après la requête
+                bouton.disabled = false;
+                bouton.innerText = "TRADUIRE EN SWAHILI";
             }
         });
     </script>
 </body>
-</html>
+                </html>
