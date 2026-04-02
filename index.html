@@ -193,21 +193,18 @@
         bouton.addEventListener('click', async () => {
             const texteATraduire = entree.value.trim();
 
-            // Stratégie : Ne pas envoyer de requête vide
             if (!texteATraduire) {
                 sortie.innerText = "Veuillez entrer du texte avant de traduire.";
                 sortie.style.color = "red";
                 return;
             }
 
-            // Posture : Informer l'utilisateur que le flux est en cours
             sortie.innerText = "Traduction en cours... (Patientez)";
             sortie.style.color = "#555";
-            bouton.disabled = true; // Désactive le bouton pendant la requête
+            bouton.disabled = true;
             bouton.innerText = "CHARGEMENT...";
 
             try {
-                // Posture : Construire la requête avec l'instruction (System Prompt)
                 const response = await fetch(API_URL, {
                     method: "POST",
                     headers: {
@@ -215,46 +212,40 @@
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        "inputs": `Traduire fidèlement le texte suivant du français vers le swahili, sans ajouter de commentaires : "${texteATraduire}"`,
+                        // Utilisation du format natif de Qwen pour de meilleurs résultats
+                        "inputs": `<|im_start|>system\nTu es un traducteur expert du français vers le swahili.<|im_end|>\n<|im_start|>user\nTraduire ce texte en swahili sans aucun commentaire supplémentaire : "${texteATraduire}"<|im_end|>\n<|im_start|>assistant\n`,
                         "parameters": {
                             "max_new_tokens": 512,
-                            "temperature": 0.1 // Température basse pour une traduction précise
+                            "temperature": 0.1
                         }
                     })
                 });
 
                 const result = await response.json();
 
-                // Stratégie : Gérer la réponse de Qwen (modèle de Chat)
                 if (result && result[0] && result[0].generated_text) {
-                    // Nettoyage simple : Qwen peut répéter l'input, on essaie d'extraire la réponse
-                    let traduction = result[0].generated_text;
+                    let texteBrut = result[0].generated_text;
                     
-                    // Si le modèle répète l'instruction, on tente de nettoyer (approche basique)
-                    if (traduction.includes(texteATraduire)) {
-                        traduction = traduction.split(texteATraduire).pop().replace(/"/g, '').trim();
-                    }
+                    // Extraction de la réponse après la balise assistant
+                    let traduction = texteBrut.split("<|im_start|>assistant\n").pop().trim();
                     
                     sortie.innerText = traduction;
-                    sortie.style.color = var(--text-color);
+                    sortie.style.color = "#333"; // Ligne corrigée avec des guillemets
                 } else {
-                    // Gestion stratégique des erreurs API (Quota, Jeton, etc.)
-                    sortie.innerText = "Erreur : L'API n'a pas renvoyé de texte. Vérifiez votre jeton ou réessayez plus tard.";
+                    sortie.innerText = "Erreur : L'API n'a pas renvoyé de texte.";
                     sortie.style.color = "red";
                     console.error("Réponse API incomplète :", result);
                 }
 
             } catch (error) {
-                // Gestion des erreurs de connexion réseau
-                sortie.innerText = "Erreur de connexion : Impossible de joindre le serveur Hugging Face.";
+                sortie.innerText = "Erreur de connexion au serveur.";
                 sortie.style.color = "red";
                 console.error("Erreur Fetch :", error);
             } finally {
-                // Rétablir l'état du bouton après la requête
                 bouton.disabled = false;
                 bouton.innerText = "TRADUIRE EN SWAHILI";
             }
         });
     </script>
-</body>
-                </html>
+</body> 
+</html>
