@@ -5,118 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FLOW LAB | IA TRADUCTION</title>
     <style>
-        /* --- Thème Bleu Validé --- */
         :root { 
             --primary: #007bff; 
-            --primary-dark: #0056b3;
             --bg: #F4F7F6; 
             --card: white; 
         }
-        body { background-color: var(--bg); padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; color: #333; }
+        body { background-color: var(--bg); padding: 20px; font-family: 'Segoe UI', sans-serif; text-align: center; color: #333; }
         main { background-color: var(--card); padding: 30px; width: 95%; max-width: 600px; margin: 0 auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h1 { margin-bottom: 5px; color: #222; }
-        .subtitle { font-size: 0.9em; color: #666; margin-bottom: 20px; }
         .menu { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px; }
-        select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
-        textarea { width: 100%; padding: 15px; height: 160px; margin: 15px 0; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; font-size: 16px; resize: none; outline: none; transition: border-color 0.3s; }
-        textarea:focus { border-color: var(--primary); }
-        button { background-color: var(--primary); color: white; width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: background-color 0.3s, transform 0.1s; }
-        button:hover { background-color: var(--primary-dark); }
+        select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; }
+        textarea { width: 100%; padding: 15px; height: 160px; margin: 15px 0; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; font-size: 16px; resize: none; outline: none; }
+        button { background-color: var(--primary); color: white; width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button:active { transform: scale(0.98); }
-        #sortie { margin-top: 25px; padding: 20px; background: #f8f8f8; border-radius: 8px; font-size: 1.1em; color: #444; border-left: 5px solid var(--primary); text-align: left; min-height: 40px; }
-        footer { margin-top: 40px; font-size: 0.85em; color: #999; }
+        #sortie { margin-top: 25px; padding: 20px; background: #f8f8f8; border-radius: 8px; border-left: 5px solid var(--primary); text-align: left; min-height: 40px; }
     </style>
 </head>
 <body>
-
     <header>
         <h1>FLOW LAB</h1>
-        <p class="subtitle">SYSTÈME DE TRADUCTION INTELLIGENT</p>
+        <p>SYSTÈME DE TRADUCTION INTELLIGENT</p>
     </header>
 
     <main>
         <div class="menu">
-            <select id="langue_src">
-                <option value="Français">Français</option>
-                <option value="Swahili">Swahili</option>
-            </select>
-            <select id="langue_trgt">
-                <option value="Swahili">Swahili</option>
-                <option value="Français">Français</option>
-            </select>
+            <select id="langue_src"><option value="Français">Français</option><option value="Swahili">Swahili</option></select>
+            <select id="langue_trgt"><option value="Swahili">Swahili</option><option value="Français">Français</option></select>
         </div>
-
         <textarea id="entree" placeholder="Tapez votre texte ici..."></textarea>
-        
         <button id="bouton">TRADUIRE MAINTENANT</button>
-
         <div id="sortie">La traduction s'affichera ici...</div>
     </main>
 
-    <footer>
-        © 2026 F-LAB IA. Déployé via GitHub Pages.<br>
-        Optimisé pour les langues locales.
-    </footer>
-
     <script>
-        // Configuration Hugging Face
-        const p1 = "hf_upEJEWLPHPyrk";
-        const p2 = "FjVurCpJlsCvXlPNIaiZm";
-        const API_TOKEN = p1 + p2;
-
-        // Solution Proxy intégrée pour résoudre l'erreur de connexion (CORS)
+        const p1 = "hf_up";
+        const p2 = "EJEWLPHPyrkFjVurCpJlsCvXlPNIaiZm";
+        const API_TOKEN = p1+p2;
         const BASE_URL = "https://router.huggingface.co/v1/chat/completions";
         const API_URL = "https://corsproxy.io/?" + encodeURIComponent(BASE_URL);
 
-        document.getElementById("bouton").addEventListener("click", traduire);
-
-        async function traduire() {
+        document.getElementById("bouton").addEventListener("click", async () => {
             const input = document.getElementById("entree").value;
             const output = document.getElementById("sortie");
-            const src = document.getElementById("langue_src").value;
-            const trgt = document.getElementById("langue_trgt").value;
-
             if (!input.trim()) return;
 
-            output.innerText = "Traitement par l'IA en cours...";
-            output.style.color = "#444";
+            output.innerText = "IA en cours de réflexion...";
 
             try {
                 const response = await fetch(API_URL, {
                     method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${API_TOKEN}`,
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Authorization": `Bearer ${API_TOKEN}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "Qwen/Qwen2.5-1.5B-Instruct", // Utilisation du modèle validé
+                        model: "deepseek-ai/DeepSeek-V3",
                         messages: [
-                            { 
-                                role: "system", 
-                                content: `Tu es un traducteur expert. Traduis fidèlement du ${src} vers le ${trgt}. Réponds uniquement avec la traduction.` 
-                            },
+                            { role: "system", content: "Tu es un traducteur expert. Traduis uniquement le texte sans explication." },
                             { role: "user", content: input }
                         ],
-                        max_tokens: 500,
-                        temperature: 0.1
+                        max_tokens: 500
                     })
                 });
-
                 const data = await response.json();
-
-                if (data.choices && data.choices[0]) {
-                    output.innerText = data.choices[0].message.content.trim();
-                } else if (data.error) {
-                    output.innerText = "Statut : " + (data.error.message || "Vérifiez vos crédits HF.");
-                } else {
-                    output.innerText = "Serveur occupé ou erreur de proxy. Réessayez.";
-                }
-
-            } catch (error) {
-                output.innerText = "Erreur de connexion persistante. Vérifiez votre réseau.";
-                console.error(error);
+                output.innerText = data.choices[0].message.content.trim();
+            } catch (e) {
+                output.innerText = "Erreur de connexion. Vérifiez le modèle.";
             }
-        }
+        });
     </script>
 </body>
 </html>
