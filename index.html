@@ -3,99 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FLOW LAB | IA TRADUCTION</title>
+    <title>FLOW LAB | IA TRADUCTION & VOIX</title>
     <style>
         :root { 
             --primary: #007bff; 
+            --secondary: #6c757d;
             --bg: #F4F7F6; 
             --card: white; 
         }
         body { background-color: var(--bg); padding: 20px; font-family: 'Segoe UI', sans-serif; text-align: center; color: #333; }
         main { background-color: var(--card); padding: 30px; width: 95%; max-width: 600px; margin: 0 auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .menu { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px; }
-        select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; }
+        select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; background: white; }
         textarea { width: 100%; padding: 15px; height: 160px; margin: 15px 0; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; font-size: 16px; resize: none; outline: none; }
-        button { background-color: var(--primary); color: white; width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .actions { display: flex; gap: 10px; }
+        button { flex: 2; background-color: var(--primary); color: white; padding: 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-audio { flex: 1; background-color: var(--secondary); font-size: 20px; }
         button:active { transform: scale(0.98); }
-        #sortie { margin-top: 25px; padding: 20px; background: #f8f8f8; border-radius: 8px; border-left: 5px solid var(--primary); text-align: left; min-height: 40px; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #sortie { margin-top: 25px; padding: 20px; background: #f8f8f8; border-radius: 8px; border-left: 5px solid var(--primary); text-align: left; min-height: 40px; white-space: pre-wrap; }
     </style>
 </head>
 <body>
     <header>
         <h1>FLOW LAB</h1>
-        <p>SYSTÈME DE TRADUCTION INTELLIGENT</p>
+        <p>SYSTÈME DE TRADUCTION & SYNTHÈSE VOCALE</p>
     </header>
 
     <main>
         <div class="menu">
             <select id="langue_src">
-                <option value="Anglais">Anglais</option>
                 <option value="Français">Français</option>
+                <option value="Anglais">Anglais</option>
                 <option value="Swahili">Swahili</option>
-                <option value="Tshiluba">Tshiluba</option>
-                <option value="Kikongo">Kikongo</option>
-                <option value="Portugais">Portugais</option>
-                <option value="Mandarin">Mandarin</option>
-                <option value="Mashi">Mashi</option>
+                <option value="Lingala">Lingala</option>
             </select>
             <select id="langue_trgt">
-                <option value="Anglais">Anglais</option>
-                <option value="Français">Français</option>
                 <option value="Swahili">Swahili</option>
+                <option value="Lingala">Lingala</option>
                 <option value="Tshiluba">Tshiluba</option>
                 <option value="Kikongo">Kikongo</option>
-                <option value="Portugais">Portugais</option>
-                <option value="Mandarin">Mandarin</option>
                 <option value="Mashi">Mashi</option>
+                <option value="Anglais">Anglais</option>
+                <option value="Mandarin">Mandarin</option>
+                <option value="Portugais">Portugais</option>
             </select>
         </div>
-        <textarea id="entree" placeholder="Tapez votre texte ici..."></textarea>
-        <button id="bouton">TRADUIRE MAINTENANT</button>
+        <textarea id="entree" placeholder="Entrez le texte à traduire..."></textarea>
+        <div class="actions">
+            <button id="bouton">TRADUIRE</button>
+            <button id="btn_ecouter" class="btn-audio" title="Écouter la traduction">🔊</button>
+        </div>
         <div id="sortie">La traduction s'affichera ici...</div>
     </main>
 
     <script>
-        const p1 = "hf_up";
-        const p2 = "EJEWLPHPyrkFjVurCpJlsCvXlPNIaiZm";
-        const API_TOKEN = p1+p2;
-        const BASE_URL = "https://router.huggingface.co/v1/chat/completions";
-        const API_URL = "https://corsproxy.io/?" + encodeURIComponent(BASE_URL);
+        // Configuration - Utiliser une variable d'environnement pour la sécurité en production
+        const API_TOKEN = "TON_TOKEN_HF_ICI"; 
+        const MODEL_TRANS = "deepseek-ai/DeepSeek-V3";
+        const MODEL_TTS = "facebook/mms-tts-swh"; // Exemple pour le Swahili
 
-        // Remplace la partie script de ton fichier par celle-ci
-document.getElementById("bouton").addEventListener("click", async () => {
-    const input = document.getElementById("entree").value;
-    const output = document.getElementById("sortie");
-    
-    // Récupération des langues choisies par l'utilisateur
-    const langueSource = document.getElementById("langue_src").value;
-    const langueCible = document.getElementById("langue_trgt").value;
+        const btnTraduire = document.getElementById("bouton");
+        const btnEcouter = document.getElementById("btn_ecouter");
+        const sortieDiv = document.getElementById("sortie");
 
-    if (!input.trim()) return;
+        // 1. Logique de Traduction
+        btnTraduire.addEventListener("click", async () => {
+            const texte = document.getElementById("entree").value;
+            const src = document.getElementById("langue_src").value;
+            const trgt = document.getElementById("langue_trgt").value;
 
-    output.innerText = "IA en cours de traduction...";
+            if (!texte.trim()) return;
+            
+            btnTraduire.disabled = true;
+            sortieDiv.innerText = "Traduction en cours...";
 
-    try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${API_TOKEN}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-                model: "deepseek-ai/DeepSeek-V3",
-                messages: [
-                    { 
-                        role: "system", 
-                        content: `Tu es un traducteur expert. Traduis fidèlement du ${langueSource} vers le ${langueCible}. Ne donne aucune explication, renvoie uniquement le texte traduit.` 
-                    },
-                    { role: "user", content: input }
-                ],
-                max_tokens: 500
-            })
+            try {
+                const response = await fetch(`https://api-inference.huggingface.co/models/${MODEL_TRANS}`, {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${API_TOKEN}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: "system", content: `Tu es un traducteur expert. Traduis du ${src} vers le ${trgt}. Réponds uniquement avec le texte traduit.` },
+                            { role: "user", content: texte }
+                        ]
+                    })
+                });
+                const data = await response.json();
+                sortieDiv.innerText = data.choices[0].message.content.trim();
+            } catch (err) {
+                sortieDiv.innerText = "Erreur de connexion.";
+            } finally {
+                btnTraduire.disabled = false;
+            }
         });
-        const data = await response.json();
-        output.innerText = data.choices[0].message.content.trim();
-    } catch (e) {
-        output.innerText = "Erreur : Vérifie ta connexion ou le modèle.";
-    }
-});
+
+        // 2. Logique de Synthèse Vocale (TTS)
+        btnEcouter.addEventListener("click", async () => {
+            const texteATraduire = sortieDiv.innerText;
+            if (!texteATraduire || texteATraduire.includes("...")) return;
+
+            btnEcouter.disabled = true;
+
+            try {
+                // Note : Pour Voxtral ou MMS, l'URL change selon le modèle choisi
+                const response = await fetch(`https://api-inference.huggingface.co/models/${MODEL_TTS}`, {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${API_TOKEN}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({ inputs: texteATraduire })
+                });
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                audio.play();
+            } catch (err) {
+                console.error("Erreur TTS:", err);
+            } finally {
+                btnEcouter.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>
