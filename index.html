@@ -49,7 +49,7 @@
                 <option value="Portugais">Portugais</option>
             </select>
         </div>
-        <textarea id="entree" placeholder="Entrez le texte à traduire..."></textarea>
+        <textarea id="entree" placeholder="Entrer le texte à traduire..."></textarea>
         <div class="actions">
             <button id="bouton">TRADUIRE</button>
             <button id="btn_ecouter" class="btn-audio" title="Écouter la traduction">🔊</button>
@@ -58,87 +58,110 @@
     </main>
 
     <script>
-        // Configuration - Utiliser une variable d'environnement pour la sécurité en production
+        // Fragmentation de la clé d'API
         const p1 = "hf_upEJEWLPHPyrkFjVur";
-        const p2 = "CpJlsCvXlPNIaiZm";
-        const API_TOKEN = p1+p2; 
+        const p2 = "CpJlsCvXlPNIaiZm"; 
+        const API_TOKEN = p1 + p2;
 
-// Configuration de l'URL avec Proxy
-const BASE_URL = "https://router.huggingface.co/v1/chat/completions";
-const API_URL = "https://corsproxy.io/?" + encodeURIComponent(BASE_URL);
+        // Dictionnaire de routage pour les modèles vocaux (ISO codes)
+        const MODELES_TTS = {
+            "Swahili": "facebook/mms-tts-swh",
+            "Lingala": "facebook/mms-tts-lin",
+            "Tshiluba": "facebook/mms-tts-lua",
+            "Kikongo": "facebook/mms-tts-kon",
+            "Français": "facebook/mms-tts-fra",
+            "Anglais": "facebook/mms-tts-eng",
+            "Mandarin": "facebook/mms-tts-cmn",
+            "Portugais": "facebook/mms-tts-por",
+            "Mashi": "facebook/mms-tts-swh" // Fallback pour le Mashi
+        };
 
-const btnTraduire = document.getElementById("bouton");
-const btnEcouter = document.getElementById("btn_ecouter");
-const sortieDiv = document.getElementById("sortie");
+        const btnTraduire = document.getElementById("bouton");
+        const btnEcouter = document.getElementById("btn_ecouter");
+        const sortieDiv = document.getElementById("sortie");
 
-// 1. Logique de Traduction (DeepSeek via Proxy)
-btnTraduire.addEventListener("click", async () => {
-    const texte = document.getElementById("entree").value;
-    const src = document.getElementById("langue_src").value;
-    const trgt = document.getElementById("langue_trgt").value;
+        // 1. Traduction via DeepSeek
+        btnTraduire.addEventListener("click", async () => {
+            const texte = document.getElementById("entree").value;
+            const src = document.getElementById("langue_src").value;
+            const trgt = document.getElementById("langue_trgt").value;
 
-    if (!texte.trim()) return;
-    
-    btnTraduire.innerText = "SÉCURISATION DU TUNNEL...";
-    btnTraduire.disabled = true;
+            if (!texte.trim()) return;
+            
+            btnTraduire.innerText = "CONNEXION EN COURS...";
+            btnTraduire.disabled = true;
 
-    try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { 
-                "Authorization": `Bearer ${API_TOKEN}`, 
-                "Content-Type": "application/json" 
-            },
-            body: JSON.stringify({
-                model: "deepseek-ai/DeepSeek-V3",
-                messages: [
-                    { role: "system", content: `Traducteur expert ${src} vers ${trgt}. Réponse courte.` },
-                    { role: "user", content: texte }
-                ],
-                max_tokens: 500
-            })
+            const BASE_URL_TRANS = "https://router.huggingface.co/v1/chat/completions";
+            const API_URL_TRANS = "https://corsproxy.io/?" + encodeURIComponent(BASE_URL_TRANS);
+
+            try {
+                const response = await fetch(API_URL_TRANS, {
+                    method: "POST",
+                    headers: { 
+                        "Authorization": `Bearer ${API_TOKEN}`, 
+                        "Content-Type": "application/json" 
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek-ai/DeepSeek-V3",
+                        messages: [
+                            { role: "system", content: `Traducteur de ${src} vers ${trgt}. Fournir uniquement le texte traduit.` },
+                            { role: "user", content: texte }
+                        ],
+                        max_tokens: 500
+                    })
+                });
+
+                if (!response.ok) throw new Error("Erreur serveur API");
+                const data = await response.json();
+                sortieDiv.innerText = data.choices[0].message.content.trim();
+
+            } catch (err) {
+                sortieDiv.innerText = "Erreur de connexion. Vérifier le réseau.";
+            } finally {
+                btnTraduire.innerText = "TRADUIRE MAINTENANT";
+                btnTraduire.disabled = false;
+            }
         });
 
-        const data = await response.json();
-        const traduction = data.choices[0].message.content;
-        sortieDiv.innerText = traduction.trim();
+        // 2. Synthèse Vocale (TTS) avec routage dynamique
+        btnEcouter.addEventListener("click", async () => {
+            const texteATraduire = sortieDiv.innerText;
+            const trgt = document.getElementById("langue_trgt").value;
+            
+            if (!texteATraduire || texteATraduire.includes("Erreur")) return;
 
-    } catch (err) {
-        sortieDiv.innerText = "Erreur de tunnel. Vérifier la connexion.";
-        console.error("Détails de l'échec :", err);
-    } finally {
-        btnTraduire.innerText = "TRADUIRE MAINTENANT";
-        btnTraduire.disabled = false;
-    }
-});
+            btnEcouter.innerText = "⏳";
+            btnEcouter.disabled = true;
+            
+            // Sélection dynamique de l'URL du modèle en fonction de la langue
+            const modeleCible = MODELES_TTS[trgt];
+            const BASE_URL_TTS = `https://api-inference.huggingface.co/models/${modeleCible}`;
+            const API_URL_TTS = "https://corsproxy.io/?" + encodeURIComponent(BASE_URL_TTS);
 
-// 2. Logique de Synthèse Vocale (TTS)
-btnEcouter.addEventListener("click", async () => {
-    const texteATraduire = sortieDiv.innerText;
-    if (!texteATraduire || texteATraduire.length < 2) return;
+            try {
+                const response = await fetch(API_URL_TTS, {
+                    method: "POST",
+                    headers: { 
+                        "Authorization": `Bearer ${API_TOKEN}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ inputs: texteATraduire })
+                });
 
-    btnEcouter.innerText = "⏳";
-    
-    // Sélection du modèle TTS selon la langue (Exemple : Swahili)
-    const TTS_BASE = "https://api-inference.huggingface.co/models/facebook/mms-tts-swh";
-    const TTS_URL = "https://corsproxy.io/?" + encodeURIComponent(TTS_BASE);
+                if (!response.ok) throw new Error("Erreur lors de la génération audio");
 
-    try {
-        const response = await fetch(TTS_URL, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${API_TOKEN}` },
-            body: JSON.stringify({ inputs: texteATraduire })
+                const blob = await response.blob();
+                const audio = new Audio(URL.createObjectURL(blob));
+                audio.play();
+                
+            } catch (err) {
+                console.error("Échec audio:", err);
+                alert("Le modèle vocal pour cette langue est en cours de chargement, réessayer dans un instant.");
+            } finally {
+                btnEcouter.innerText = "🔊";
+                btnEcouter.disabled = false;
+            }
         });
-
-        const blob = await response.blob();
-        const audio = new Audio(URL.createObjectURL(blob));
-        audio.play();
-    } catch (err) {
-        console.error("Échec de la voix");
-    } finally {
-        btnEcouter.innerText = "🔊";
-    }
-});
     </script>
 </body>
 </html>
