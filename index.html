@@ -59,72 +59,86 @@
 
     <script>
         // Configuration - Utiliser une variable d'environnement pour la sécurité en production
-        const p1 = "hf_upEJEWLPHPyrkFjVur"
-        const p2 = "CpJlsCvXlPNIaiZm"
+        const p1 = "hf_upEJEWLPHPyrkFjVur";
+        const p2 = "CpJlsCvXlPNIaiZm";
         const API_TOKEN = p1+p2; 
-        const MODEL_TRANS = "deepseek-ai/DeepSeek-V3";
-        const MODEL_TTS = "facebook/mms-tts-swh"; // Exemple pour le Swahili
 
-        const btnTraduire = document.getElementById("bouton");
-        const btnEcouter = document.getElementById("btn_ecouter");
-        const sortieDiv = document.getElementById("sortie");
+// Configuration de l'URL avec Proxy
+const BASE_URL = "https://router.huggingface.co/v1/chat/completions";
+const API_URL = "https://corsproxy.io/?" + encodeURIComponent(BASE_URL);
 
-        // 1. Logique de Traduction
-        btnTraduire.addEventListener("click", async () => {
-            const texte = document.getElementById("entree").value;
-            const src = document.getElementById("langue_src").value;
-            const trgt = document.getElementById("langue_trgt").value;
+const btnTraduire = document.getElementById("bouton");
+const btnEcouter = document.getElementById("btn_ecouter");
+const sortieDiv = document.getElementById("sortie");
 
-            if (!texte.trim()) return;
-            
-            btnTraduire.disabled = true;
-            sortieDiv.innerText = "Traduction en cours...";
+// 1. Logique de Traduction (DeepSeek via Proxy)
+btnTraduire.addEventListener("click", async () => {
+    const texte = document.getElementById("entree").value;
+    const src = document.getElementById("langue_src").value;
+    const trgt = document.getElementById("langue_trgt").value;
 
-            try {
-                const response = await fetch(`https://api-inference.huggingface.co/models/${MODEL_TRANS}`, {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${API_TOKEN}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        messages: [
-                            { role: "system", content: `Tu es un traducteur expert. Traduis du ${src} vers le ${trgt}. Réponds uniquement avec le texte traduit.` },
-                            { role: "user", content: texte }
-                        ]
-                    })
-                });
-                const data = await response.json();
-                sortieDiv.innerText = data.choices[0].message.content.trim();
-            } catch (err) {
-                sortieDiv.innerText = "Erreur de connexion.";
-            } finally {
-                btnTraduire.disabled = false;
-            }
+    if (!texte.trim()) return;
+    
+    btnTraduire.innerText = "SÉCURISATION DU TUNNEL...";
+    btnTraduire.disabled = true;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { 
+                "Authorization": `Bearer ${API_TOKEN}`, 
+                "Content-Type": "application/json" 
+            },
+            body: JSON.stringify({
+                model: "deepseek-ai/DeepSeek-V3",
+                messages: [
+                    { role: "system", content: `Traducteur expert ${src} vers ${trgt}. Réponse courte.` },
+                    { role: "user", content: texte }
+                ],
+                max_tokens: 500
+            })
         });
 
-        // 2. Logique de Synthèse Vocale (TTS)
-        btnEcouter.addEventListener("click", async () => {
-            const texteATraduire = sortieDiv.innerText;
-            if (!texteATraduire || texteATraduire.includes("...")) return;
+        const data = await response.json();
+        const traduction = data.choices[0].message.content;
+        sortieDiv.innerText = traduction.trim();
 
-            btnEcouter.disabled = true;
+    } catch (err) {
+        sortieDiv.innerText = "Erreur de tunnel. Vérifier la connexion.";
+        console.error("Détails de l'échec :", err);
+    } finally {
+        btnTraduire.innerText = "TRADUIRE MAINTENANT";
+        btnTraduire.disabled = false;
+    }
+});
 
-            try {
-                // Note : Pour Voxtral ou MMS, l'URL change selon le modèle choisi
-                const response = await fetch(`https://api-inference.huggingface.co/models/${MODEL_TTS}`, {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${API_TOKEN}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({ inputs: texteATraduire })
-                });
+// 2. Logique de Synthèse Vocale (TTS)
+btnEcouter.addEventListener("click", async () => {
+    const texteATraduire = sortieDiv.innerText;
+    if (!texteATraduire || texteATraduire.length < 2) return;
 
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                const audio = new Audio(url);
-                audio.play();
-            } catch (err) {
-                console.error("Erreur TTS:", err);
-            } finally {
-                btnEcouter.disabled = false;
-            }
+    btnEcouter.innerText = "⏳";
+    
+    // Sélection du modèle TTS selon la langue (Exemple : Swahili)
+    const TTS_BASE = "https://api-inference.huggingface.co/models/facebook/mms-tts-swh";
+    const TTS_URL = "https://corsproxy.io/?" + encodeURIComponent(TTS_BASE);
+
+    try {
+        const response = await fetch(TTS_URL, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${API_TOKEN}` },
+            body: JSON.stringify({ inputs: texteATraduire })
         });
+
+        const blob = await response.blob();
+        const audio = new Audio(URL.createObjectURL(blob));
+        audio.play();
+    } catch (err) {
+        console.error("Échec de la voix");
+    } finally {
+        btnEcouter.innerText = "🔊";
+    }
+});
     </script>
 </body>
 </html>
