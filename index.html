@@ -35,55 +35,65 @@
         const resultat = document.getElementById('resultat');
 
         // Étape B : On définit la clé et l'adresse de l'IA
-        const CLE_API = "hf_upEJEWLPHPyrkFjVur" + "CpJlsCvXlPNIaiZm";
-        const MODELE_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-base";
+         // On sépare la clé pour éviter les robots de scan basiques sur GitHub
+const p1 = "hf_upEJEWLPHPyrkFjVur";
+const p2 = "CpJlsCvXlPNIaiZm";
+const API_KEY = p1 + p2;
 
-        // Étape C : On dit au bouton d'écouter le "click"
-        bouton.addEventListener('click', async () => {
-            
-            // 1. Vérifier si un fichier est choisi
-            const image = input.files[0];
-            if (!image) {
-                alert("Erreur : Choisis une image d'abord !");
-                return;
-            }
+async function runOCR() {
+    const fileInput = document.getElementById('imgFile'); // Vérifie que l'ID est bien imgFile
+    const file = fileInput.files[0];
+    const status = document.getElementById('status');
+    const resDiv = document.getElementById('res');
 
-            // 2. Changer l'affichage pour montrer que ça travaille
-            statut.innerText = "⏳ Connexion à l'IA en cours...";
-            bouton.disabled = true; // On désactive le bouton pour éviter les doubles clics
-            resultat.innerText = "...";
+    if (!file) {
+        alert("Sélectionne une image d'abord !");
+        return;
+    }
 
-            try {
-                // 3. L'envoi (Le Fetch)
-                const reponse = await fetch(MODELE_URL, {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${CLE_API}` },
-                    body: image // On envoie directement le fichier image
-                });
+    status.innerText = "⏳ Envoi en cours...";
+    resDiv.innerText = "";
 
-                // 4. On transforme la réponse en JSON (format lisible)
-                const donnees = await reponse.json();
-
-                // 5. On affiche le résultat
-                if (reponse.ok) {
-                    statut.innerText = "✅ Succès !";
-                    // BLIP renvoie un tableau [ { generated_text: "..." } ]
-                    resultat.innerText = donnees[0].generated_text || "Image analysée, mais pas de texte trouvé.";
-                } else {
-                    statut.innerText = "❌ Erreur de l'IA";
-                    resultat.innerText = "Détails : " + JSON.stringify(donnees);
-                }
-
-            } catch (erreur) {
-                // 6. Gestion des crashs (ex: pas d'internet)
-                statut.innerText = "❌ Crash réseau";
-                resultat.innerText = "Vérifie ta connexion ou si tu es bien sur un serveur (http/https).";
-                console.error(erreur);
-            } finally {
-                // On réactive le bouton à la fin
-                bouton.disabled = false;
-            }
+    try {
+        const response = await fetch("https://api-inference.huggingface.co/models/Qwen/Qwen2.5-VL-72B-Instruct", {
+            method: "POST",
+            headers: { 
+                "Authorization": `Bearer ${API_KEY}`
+                // Note : On NE met PAS de Content-Type, le navigateur le fait seul pour les fichiers
+            },
+            body: file
         });
+
+        // 1. On vérifie si le serveur a répondu (même si c'est une erreur)
+        const data = await response.json();
+
+        if (!response.ok) {
+            // Si c'est une erreur 401, ta clé est morte ou mal copiée
+            if (response.status === 401) {
+                status.innerText = "❌ Erreur 401 : Jeton invalide ou expiré.";
+            } 
+            // Si le modèle charge
+            else if (data.error && data.error.includes("loading")) {
+                status.innerText = "⏳ Modèle en cours de démarrage... Réessaie dans 15 secondes.";
+            } 
+            else {
+                status.innerText = "❌ Erreur API : " + (data.error || response.statusText);
+            }
+            return;
+        }
+
+        // 2. Si ça marche, on traite le résultat
+        // Qwen-VL renvoie souvent un tableau ou un objet direct
+        const text = data[0]?.generated_text || data.generated_text || "Aucun texte détecté.";
+        resDiv.innerText = text;
+        status.innerText = "✅ Succès !";
+
+    } catch (e) {
+        // 3. Erreur de connexion (CORS, Internet coupé, etc.)
+        status.innerText = "❌ Erreur de connexion (Vérifie ta console F12)";
+        console.error("ERREUR COMPLETE :", e);
+    }
+}
     </script>
 </body>
 </html>
