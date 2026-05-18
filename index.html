@@ -3,167 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FLOW LAB | IA TRADUCTION & OCR</title>
+    <title>Llink | IA Chat & Traduction</title>
     <style>
-        :root { 
-            --primary: #d32f2f; 
-            --primary-dark: #b71c1c;
-            --bg: #fff5f5; 
-            --card: white; 
-        }
-        body { background-color: var(--bg); padding: 20px; font-family: 'Segoe UI', sans-serif; text-align: center; color: #333; }
-        main { background-color: var(--card); padding: 30px; width: 95%; max-width: 600px; margin: 0 auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(211, 47, 47, 0.1); }
-        header h1 { color: var(--primary-dark); margin-bottom: 5px; }
-        header p { color: #666; font-size: 14px; margin-top: 0; }
-        .menu { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 10px; }
-        select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; background: white; }
-        textarea { width: 100%; padding: 15px; height: 120px; margin: 10px 0; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; font-size: 16px; resize: none; outline: none; }
-        .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-        button, .btn-upload { flex: 1; background-color: var(--primary); color: white; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; min-width: 45%; text-align: center; }
-        .btn-upload { background-color: #424242; }
-        button:active, .btn-upload:active { transform: scale(0.98); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        input[type="file"] { display: none; }
-        #sortie { padding: 20px; background: #fafafa; border-radius: 8px; border-left: 5px solid var(--primary); text-align: left; min-height: 40px; white-space: pre-wrap; }
-        #status_ocr { font-size: 12px; color: var(--primary-dark); font-weight: bold; margin-bottom: 10px; display: block; }
+        :root { --primary: #4285f4; --secondary: #d96570; --bg: #131314; --surface: #1E1F20; --text: #E3E3E3; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); line-height: 1.6; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        header { text-align: center; padding: 40px 20px; background: var(--surface); border-radius: 20px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { font-size: 2.5rem; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+        h3 { color: #A0A0A0; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+        .intro-text { font-size: 1.1rem; color: #CCCCCC; max-width: 700px; margin: 0 auto; }
+        
+        main { background: var(--surface); border-radius: 20px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .context { font-size: 1.1rem; margin-bottom: 30px; border-left: 4px solid var(--primary); padding-left: 20px; color: #E3E3E3; }
+        
+        .features { display: grid; gap: 20px; margin-top: 30px; }
+        .feature-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 25px; transition: transform 0.3s ease; }
+        .feature-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .feature-title { font-size: 1.2rem; font-weight: bold; color: white; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        
+        footer { text-align: center; margin-top: 40px; padding: 20px; color: #A0A0A0; }
+        .flow-lab { font-weight: bold; font-size: 1.2rem; margin-top: 15px; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>FLOW LAB</h1>
-        <p>TRADUCTION IA & VISION OPTIQUE</p>
-    </header>
+    <div class="container">
+        <header>
+            <h1>Llink</h1>
+            <h3>L'IA par Flow Lab</h3>
+            <p class="intro-text">Une innovation technologique renfermant les meilleures technologies actuelles en matière d'IA, conçue spécifiquement pour les régions souffrant de problèmes de connexion et de coûts de forfaits élevés, notamment à l'Est de la RDC.</p>
+        </header>
 
-    <main>
-        <div class="menu">
-            <select id="langue_src">
-                <option value="Français">Français</option>
-                <option value="Anglais">Anglais</option>
-                <option value="Swahili">Swahili</option>
-            </select>
-            <select id="langue_trgt">
-                <option value="Swahili">Swahili</option>
-                <option value="Lingala">Lingala</option>
-                <option value="Français">Français</option>
-            </select>
-        </div>
+        <main>
+            <p class="context">
+                <strong>Le Constat :</strong> Dans certaines régions africaines, le manque de forfaits internet et l'instabilité des réseaux de communication freinent l'accès à l'information. Llink résout ces problèmes de façon innovante et adaptée aux réalités locales.
+            </p>
 
-        <div class="actions">
-            <label class="btn-upload">
-                📸 SCANNER TEXTE
-                <input type="file" accept="image/*" capture="environment" id="input_image">
-            </label>
-            <button id="bouton">TRADUIRE</button>
-        </div>
-        
-        <span id="status_ocr"></span>
-        <textarea id="entree" placeholder="Le texte scanné apparaîtra ici ou tapez-le manuellement..."></textarea>
-        
-        <div id="sortie">La traduction s'affichera ici...</div>
-    </main>
-
-    <script>
-        // Fragmentation de la clé API pour la sécurité sur GitHub
-        const p1 = "hf_upEJEWLPHPyrkFjVur";
-        const p2 = "CpJlsCvXlPNIaiZm"; 
-        const API_TOKEN = p1 + p2;
-
-        const inputImage = document.getElementById("input_image");
-        const statusOcr = document.getElementById("status_ocr");
-        const entreeTxt = document.getElementById("entree");
-        const btnTraduire = document.getElementById("bouton");
-        const sortieDiv = document.getElementById("sortie");
-
-        // 1. Logique d'extraction de texte (OCR) via Hugging Face (Qwen-VL)
-        inputImage.addEventListener("change", async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            statusOcr.innerText = "⏳ Envoi de l'image à l'IA visuelle...";
+            <h2 style="margin-bottom: 20px; color: white;">Ce qui différencie Llink :</h2>
             
-            try {
-                const VISION_API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-VL-72B-Instruct";
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-title">💬 Chat & Traduction Intégrés</div>
+                    <p>Discutez avec Llink comme avec n'importe quelle autre IA pour poser des questions ou demander des conseils. Basculez en mode Traduction pour traduire fidèlement vos documents. Llink est à la fois un chatbot intelligent et un traducteur expert.</p>
+                </div>
                 
-                const response = await fetch(VISION_API_URL, {
-                    method: "POST",
-                    headers: { 
-                        "Authorization": `Bearer ${API_TOKEN}` 
-                    },
-                    body: file
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    if (data.error && data.error.includes("loading")) {
-                        statusOcr.innerText = "⏳ Le modèle d'analyse démarre... Essai à refaire dans 20 secondes.";
-                    } else {
-                        statusOcr.innerText = "❌ Erreur : " + (data.error || "Refus du serveur");
-                    }
-                    return;
-                }
-
-                const texteExtrait = data[0]?.generated_text || data.generated_text || "Aucun texte détecté.";
-                entreeTxt.value = texteExtrait.trim();
-                statusOcr.innerText = "✅ Image analysée avec succès.";
+                <div class="feature-card">
+                    <div class="feature-title">⚡ Mode Hors-Ligne (Offline) Révolutionnaire</div>
+                    <p>Llink propose un fonctionnement en deux modes. Grâce au bouton Online/Offline, vous pouvez choisir d'utiliser votre forfait ou non. Dès l'installation, <strong>une IA locale est intégrée à votre appareil</strong>. Un abonnement de seulement 2.5$/mois (5000 FC) permet de l'activer, divisant vos coûts internet mensuels par 6 tout en garantissant un accès 24h/24, sans coupure.</p>
+                </div>
                 
-                setTimeout(() => statusOcr.innerText = "", 3000);
+                <div class="feature-card">
+                    <div class="feature-title">🚀 Des Capacités de Pointe</div>
+                    <p>Llink rivalise avec les géants de la tech : transcription audio (voix en texte) et analyse d'images (OCR). Des améliorations sont déjà en cours pour la génération d'images et la prise en charge vidéo.</p>
+                </div>
+            </div>
+        </main>
 
-            } catch (err) {
-                statusOcr.innerText = "❌ Échec de la connexion réseau.";
-                console.error(err);
-            }
-        });
-
-        // 2. Logique de Traduction (DeepSeek-V3 via Proxy CORS)
-        btnTraduire.addEventListener("click", async () => {
-            const texte = entreeTxt.value;
-            const src = document.getElementById("langue_src").value;
-            const trgt = document.getElementById("langue_trgt").value;
-
-            if (!texte.trim()) return;
-            
-            btnTraduire.innerText = "EN COURS...";
-            btnTraduire.disabled = true;
-
-            const BASE_URL_TRANS = "https://router.huggingface.co/v1/chat/completions";
-            // Proxy CORS indispensable pour l'appel depuis un navigateur
-            const API_URL_TRANS = "https://corsproxy.io/?" + encodeURIComponent(BASE_URL_TRANS);
-
-            try {
-                const response = await fetch(API_URL_TRANS, {
-                    method: "POST",
-                    headers: { 
-                        "Authorization": `Bearer ${API_TOKEN}`, 
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "deepseek-ai/DeepSeek-V3",
-                        messages: [
-                            { role: "system", content: `Traduis avec précision de ${src} vers ${trgt}. Ne fournis que le texte final, sans commentaires ni guillemets.` },
-                            { role: "user", content: texte }
-                        ],
-                        max_tokens: 500
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (response.ok) {
-                    sortieDiv.innerText = data.choices[0].message.content.trim();
-                } else {
-                    sortieDiv.innerText = "❌ Erreur API : " + (data.error?.message || "Erreur inconnue");
-                }
-
-            } catch (err) {
-                sortieDiv.innerText = "❌ Erreur réseau ou blocage proxy.";
-                console.error(err);
-            } finally {
-                btnTraduire.innerText = "TRADUIRE";
-                btnTraduire.disabled = false;
-            }
-        });
-    </script>
+        <footer>
+            <p>La solution ultime pour rester connecté au savoir, même sans forfait internet.</p>
+            <div class="flow-lab">from Flow Lab</div>
+        </footer>
+    </div>
 </body>
 </html>
